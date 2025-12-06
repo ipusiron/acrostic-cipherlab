@@ -5,7 +5,7 @@ slug: acrostic-cipherlab
 
 title: "Acrostic CipherLab"
 
-subtitle_ja: "位置指定文字抽出ツール"
+subtitle_ja: "アクロスティック解読ツール"
 subtitle_en: "Laboratory for Acrostic & Positional Extraction"
 
 description_ja: "行頭文字や任意位置を抽出して隠れメッセージを可視化するアクロスティック解読ツール。"
@@ -35,7 +35,7 @@ hub: true
 ---
 -->
 
-# Acrostic CipherLab – 位置指定文字抽出ツール
+# Acrostic CipherLab – アクロスティック解読ツール
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/ipusiron/acrostic-cipherlab?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/ipusiron/acrostic-cipherlab?style=social)
@@ -45,7 +45,7 @@ hub: true
 
 **Day103 - 生成AIで作るセキュリティツール200**
 
-Acrostic CipherLabは、行頭文字や任意位置を抽出して隠れメッセージを可視化する教育向けアクロスティック解析ツールです。
+Acrostic CipherLabは、行頭文字や任意位置を抽出して隠れメッセージを可視化するアクロスティック解析ツールです。
 
 ---
 

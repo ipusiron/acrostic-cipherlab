@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acrostic CipherLab</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>Acrostic CipherLab</h1>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="basic">アクロスティック</button>
+      <button class="tab" data-tab="advanced">拡張アクロスティック</button>
+    </div>
+
+    <div id="tab-basic" class="tab-content active">
+      <section class="panel">
+        <h2>入力テキスト</h2>
+        <textarea id="input-basic" placeholder="複数行のテキストを入力してください"></textarea>
+        <button id="run-basic" class="btn-primary">抽出する</button>
+        <h2>抽出結果</h2>
+        <textarea id="output-basic" readonly placeholder="抽出された文字列がここに表示されます"></textarea>
+      </section>
+    </div>
+
+    <div id="tab-advanced" class="tab-content">
+      <section class="panel">
+        <h2>入力テキスト</h2>
+        <textarea id="input-adv" placeholder="複数行のテキストを入力してください"></textarea>
+
+        <div class="options">
+          <div class="option-group">
+            <label for="mode">抽出モード</label>
+            <select id="mode">
+              <option value="head">行頭から n 文字目</option>
+              <option value="tail">行末から前に n 文字目</option>
+              <option value="symbol">カンマ・ピリオド前の n 文字目</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <label for="n">n の値</label>
+            <input type="number" id="n" min="1" value="1">
+          </div>
+        </div>
+
+        <button id="run-adv" class="btn-primary">抽出する</button>
+        <h2>抽出結果</h2>
+        <textarea id="output-adv" readonly placeholder="抽出された文字列がここに表示されます"></textarea>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer">
+      🔗 GitHubリポジトリはこちら（
+        <a href="https://github.com/ipusiron/acrostic-cipherlab" target="_blank">
+          ipusiron/acrostic-cipherlab
+        </a>
+      ）
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
