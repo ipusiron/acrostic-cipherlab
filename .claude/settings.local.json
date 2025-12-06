@@ -40,7 +40,8 @@
       "Bash(start:*)",
       "mcp__context7__resolve-library-id",
       "Read(//d/**)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Skill(readme-polisher)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
