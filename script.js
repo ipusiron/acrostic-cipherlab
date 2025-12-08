@@ -7,13 +7,63 @@ document.addEventListener('DOMContentLoaded', () => {
     tab.addEventListener('click', () => {
       const targetTab = tab.dataset.tab;
 
-      tabs.forEach(t => t.classList.remove('active'));
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
       tabContents.forEach(c => c.classList.remove('active'));
 
       tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
       document.getElementById(`tab-${targetTab}`).classList.add('active');
     });
   });
+
+  // コピー機能
+  function copyToClipboard(textareaId, buttonId) {
+    const textarea = document.getElementById(textareaId);
+    const button = document.getElementById(buttonId);
+
+    button.addEventListener('click', async () => {
+      const text = textarea.value;
+      if (!text) return;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = 'コピー完了';
+        button.classList.add('copied');
+
+        setTimeout(() => {
+          button.textContent = 'コピー';
+          button.classList.remove('copied');
+        }, 1500);
+      } catch {
+        button.textContent = '失敗';
+        setTimeout(() => {
+          button.textContent = 'コピー';
+        }, 1500);
+      }
+    });
+  }
+
+  copyToClipboard('output-basic', 'copy-basic');
+  copyToClipboard('output-adv', 'copy-adv');
+
+  // クリア機能
+  function setupClear(inputId, outputId, buttonId) {
+    const input = document.getElementById(inputId);
+    const output = document.getElementById(outputId);
+    const button = document.getElementById(buttonId);
+
+    button.addEventListener('click', () => {
+      input.value = '';
+      output.value = '';
+      input.focus();
+    });
+  }
+
+  setupClear('input-basic', 'output-basic', 'clear-basic');
+  setupClear('input-adv', 'output-adv', 'clear-adv');
 
   // 基本タブ：行頭文字抽出
   const runBasic = document.getElementById('run-basic');

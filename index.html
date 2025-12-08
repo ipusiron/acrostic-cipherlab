@@ -12,25 +12,31 @@
   <main class="container">
     <h1>Acrostic CipherLab</h1>
 
-    <div class="tabs">
-      <button class="tab active" data-tab="basic">アクロスティック</button>
-      <button class="tab" data-tab="advanced">拡張アクロスティック</button>
+    <div class="tabs" role="tablist">
+      <button id="tab-btn-basic" class="tab active" data-tab="basic" role="tab" aria-selected="true" aria-controls="tab-basic">アクロスティック</button>
+      <button id="tab-btn-advanced" class="tab" data-tab="advanced" role="tab" aria-selected="false" aria-controls="tab-advanced">拡張アクロスティック</button>
     </div>
 
-    <div id="tab-basic" class="tab-content active">
+    <div id="tab-basic" class="tab-content active" role="tabpanel" aria-labelledby="tab-btn-basic">
       <section class="panel">
         <h2>入力テキスト</h2>
-        <textarea id="input-basic" placeholder="複数行のテキストを入力してください"></textarea>
+        <textarea id="input-basic" aria-label="入力テキスト" placeholder="複数行のテキストを入力してください"></textarea>
         <button id="run-basic" class="btn-primary">抽出する</button>
         <h2>抽出結果</h2>
-        <textarea id="output-basic" readonly placeholder="抽出された文字列がここに表示されます"></textarea>
+        <div class="output-wrapper">
+          <textarea id="output-basic" aria-label="抽出結果" readonly placeholder="抽出された文字列がここに表示されます"></textarea>
+          <div class="output-actions">
+            <button id="copy-basic" class="btn-action" type="button" aria-label="結果をコピー">コピー</button>
+            <button id="clear-basic" class="btn-action" type="button">クリア</button>
+          </div>
+        </div>
       </section>
     </div>
 
-    <div id="tab-advanced" class="tab-content">
+    <div id="tab-advanced" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-advanced">
       <section class="panel">
         <h2>入力テキスト</h2>
-        <textarea id="input-adv" placeholder="複数行のテキストを入力してください"></textarea>
+        <textarea id="input-adv" aria-label="入力テキスト" placeholder="複数行のテキストを入力してください"></textarea>
 
         <div class="options">
           <div class="option-group">
@@ -49,7 +55,13 @@
 
         <button id="run-adv" class="btn-primary">抽出する</button>
         <h2>抽出結果</h2>
-        <textarea id="output-adv" readonly placeholder="抽出された文字列がここに表示されます"></textarea>
+        <div class="output-wrapper">
+          <textarea id="output-adv" aria-label="抽出結果" readonly placeholder="抽出された文字列がここに表示されます"></textarea>
+          <div class="output-actions">
+            <button id="copy-adv" class="btn-action" type="button" aria-label="結果をコピー">コピー</button>
+            <button id="clear-adv" class="btn-action" type="button">クリア</button>
+          </div>
+        </div>
       </section>
     </div>
   </main>

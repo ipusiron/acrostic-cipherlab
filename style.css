@@ -152,6 +152,51 @@ input[type="number"] {
   background-color: #2d6bb3;
 }
 
+.btn-primary:focus-visible,
+.btn-action:focus-visible {
+  outline: 2px solid #2d6bb3;
+  outline-offset: 2px;
+}
+
+.output-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.output-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.btn-action {
+  padding: 0.5rem 1rem;
+  min-width: 80px;
+  background-color: #fff;
+  color: #666;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.btn-action:hover {
+  background-color: #f5f5f5;
+  border-color: #999;
+}
+
+.btn-action:active {
+  background-color: #eee;
+}
+
+.btn-action.copied {
+  background-color: #4a90d9;
+  color: #fff;
+  border-color: #4a90d9;
+}
+
 footer {
   margin-top: 2rem;
 }

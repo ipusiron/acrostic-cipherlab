@@ -1,62 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mv:*)",
-      "Bash(ls:*)",
-      "Bash(mkdir:*)",
-      "Bash(python:*)",
-      "Bash(rm:*)",
-      "Bash(taskkill:*)",
-      "Bash(find:*)",
-      "Bash(tree:*)",
-      "Bash(grep:*)",
-      "Bash(start index.html)",
-      "Bash(node:*)",
-      "Bash(cp:*)",
-      "Bash(git add:*)",
-      "Bash(start http://localhost:8000)",
-      "WebSearch",
-      "Bash(start test-xss.html)",
-      "Bash(start index2.html)",
-      "Bash(dir)",
-      "WebFetch(domain:github.com)",
-      "Bash(curl:*)",
-      "WebFetch(domain:www.i.h.kyoto-u.ac.jp)",
-      "WebFetch(domain:jp.ariat-tech.com)",
-      "WebFetch(domain:ipusiron.github.io)",
-      "WebFetch(domain:docs.github.com)",
-      "Bash(cat:*)",
-      "WebFetch(domain:en.wikipedia.org)",
-      "WebFetch(domain:ja.wikipedia.org)",
-      "Bash(timeout:*)",
-      "Bash(dir /s)",
-      "Bash(awk:*)",
-      "Bash(start \"D:\\try100\\day086\\epigraph-chronogrammer\\index.html\")",
-      "Bash(start \"D:\\try100\\day088\\pin-threat-simulator\\index.html\")",
-      "Bash(start \"D:\\try100\\day090\\fontorigin-analyzer\\index.html\")",
-      "WebFetch(domain:cdn.jsdelivr.net)",
-      "Bash(netstat:*)",
-      "WebFetch(domain:www.wikidata.org)",
-      "Bash(start:*)",
-      "mcp__context7__resolve-library-id",
-      "Read(//d/**)",
-      "Bash(dir:*)",
-      "Skill(readme-polisher)"
+      "Bash(tree:*)"
     ],
     "deny": [],
-    "defaultMode": "acceptEdits"
-  },
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "powershell -Command \"(New-Object Media.SoundPlayer 'C:\\\\Users\\\\owner\\\\OneDrive\\\\Documents\\\\claude\\\\marisa_owattaze.wav').PlaySync()\""
-          }
-        ]
-      }
-    ]
+    "ask": []
   }
 }
