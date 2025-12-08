@@ -44,6 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const lines = inputAdv.value.split(/\r?\n/);
     const mode = modeSelect.value;
     const n = parseInt(nInput.value, 10);
+
+    if (isNaN(n) || n < 1) {
+      outputAdv.value = 'エラー: n は1以上の整数を入力してください';
+      return;
+    }
+
     let result = '';
 
     for (const line of lines) {
