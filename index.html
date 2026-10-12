@@ -18,12 +18,13 @@
     <div class="tabs" role="tablist" aria-label="抽出方法">
       <button id="tab-btn-basic" class="tab active" data-tab="basic" role="tab" aria-selected="true" aria-controls="tab-basic">アクロスティック</button>
       <button id="tab-btn-advanced" class="tab" data-tab="advanced" role="tab" aria-selected="false" aria-controls="tab-advanced">拡張アクロスティック</button>
+      <button id="tab-btn-lab" class="tab" data-tab="lab" role="tab" aria-selected="false" aria-controls="tab-lab">Unicode比較ラボ</button>
     </div>
 
     <div id="tab-basic" class="tab-content active" role="tabpanel" aria-labelledby="tab-btn-basic">
       <section class="panel">
         <h2>入力テキスト</h2>
-        <textarea id="input-basic" aria-label="入力テキスト" placeholder="複数行のテキストを入力してください"></textarea>
+        <textarea id="input-basic" maxlength="100000" aria-label="入力テキスト" placeholder="複数行のテキストを入力してください"></textarea>
         <div class="options">
           <div class="option-group">
             <label for="normalization-basic">Unicode正規化</label>
@@ -63,7 +64,7 @@
     <div id="tab-advanced" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-advanced">
       <section class="panel">
         <h2>入力テキスト</h2>
-        <textarea id="input-adv" aria-label="入力テキスト" placeholder="複数行のテキストを入力してください"></textarea>
+        <textarea id="input-adv" maxlength="100000" aria-label="入力テキスト" placeholder="複数行のテキストを入力してください"></textarea>
 
         <div class="options">
           <div class="option-group">
@@ -71,7 +72,7 @@
             <select id="mode">
               <option value="head">行頭から n 文字目</option>
               <option value="tail">行末から前に n 文字目</option>
-              <option value="symbol">カンマ・ピリオド前の n 文字目</option>
+              <option value="symbol">句読点前の n 文字目</option>
             </select>
           </div>
           <div class="option-group" id="punctuation-group" hidden>
@@ -84,7 +85,7 @@
           </div>
           <div class="option-group">
             <label for="n">n の値</label>
-            <input type="number" id="n" min="1" value="1">
+            <input type="number" id="n" min="1" max="10000" value="1">
           </div>
           <div class="option-group">
             <label for="normalization-adv">Unicode正規化</label>
@@ -119,6 +120,72 @@
             </table>
           </div>
         </details>
+      </section>
+    </div>
+
+    <div id="tab-lab" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-lab">
+      <section class="panel">
+        <h2>Unicodeの数え方を比較</h2>
+        <p class="help-text">同じ見た目でも、UTF-16コード単位・コードポイント・書記素クラスタでは文字数が異なることがあります。</p>
+        <p id="segmentation-mode" class="environment-note" aria-live="polite"></p>
+        <div class="sample-actions" aria-label="学習用サンプル">
+          <button class="btn-action lab-sample" type="button" data-sample="emoji">絵文字</button>
+          <button class="btn-action lab-sample" type="button" data-sample="combining">結合文字</button>
+          <button class="btn-action lab-sample" type="button" data-sample="whitespace">行頭空白</button>
+          <button class="btn-action lab-sample" type="button" data-sample="compatibility">互換文字</button>
+        </div>
+        <label class="field-label" for="input-lab">比較するテキスト</label>
+        <textarea id="input-lab" maxlength="100000" aria-label="比較するテキスト" placeholder="サンプルを選ぶか、複数行のテキストを入力してください"></textarea>
+        <div class="options">
+          <div class="option-group">
+            <label for="lab-line">分割表示する行</label>
+            <input type="number" id="lab-line" min="1" max="2000" value="1">
+          </div>
+          <div class="option-group">
+            <label for="lab-n">行頭から抽出する位置</label>
+            <input type="number" id="lab-n" min="1" max="10000" value="1">
+          </div>
+        </div>
+        <div class="primary-actions">
+          <button id="run-lab" class="btn-primary" type="button">比較する</button>
+          <button id="clear-lab" class="btn-action" type="button">クリア</button>
+        </div>
+        <div id="summary-lab" class="result-summary" aria-live="polite"></div>
+
+        <details class="trace-details" open>
+          <summary>行ごとの文字数</summary>
+          <div class="table-scroll" tabindex="0" aria-label="行ごとのUnicode文字数">
+            <table class="unicode-table">
+              <thead><tr><th>行</th><th>原文</th><th>UTF-16</th><th>コードポイント</th><th>書記素</th><th>NFC変化</th><th>NFKC変化</th></tr></thead>
+              <tbody id="unicode-counts"></tbody>
+            </table>
+          </div>
+        </details>
+
+        <details class="trace-details" open>
+          <summary>選択行の分割</summary>
+          <div class="segmentation-grid">
+            <section>
+              <h3>コードポイント</h3>
+              <div id="codepoint-tokens" class="token-list"></div>
+            </section>
+            <section>
+              <h3>書記素クラスタ</h3>
+              <div id="grapheme-tokens" class="token-list"></div>
+            </section>
+          </div>
+        </details>
+
+        <details class="trace-details" open>
+          <summary>正規化・空白処理による抽出差</summary>
+          <div class="table-scroll" tabindex="0" aria-label="正規化と空白処理の抽出比較">
+            <table>
+              <thead><tr><th>条件</th><th>抽出結果</th><th>採用</th><th>除外</th></tr></thead>
+              <tbody id="variant-results"></tbody>
+            </table>
+          </div>
+        </details>
+        <p class="notice">結果の違いは文字の数え方や前処理の差を示すだけで、隠しメッセージの存在や作成者の意図を証明しません。</p>
       </section>
     </div>
   </main>
