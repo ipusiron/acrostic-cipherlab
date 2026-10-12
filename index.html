@@ -18,6 +18,7 @@
     <div class="tabs" role="tablist" aria-label="抽出方法">
       <button id="tab-btn-basic" class="tab active" data-tab="basic" role="tab" aria-selected="true" aria-controls="tab-basic">アクロスティック</button>
       <button id="tab-btn-advanced" class="tab" data-tab="advanced" role="tab" aria-selected="false" aria-controls="tab-advanced">拡張アクロスティック</button>
+      <button id="tab-btn-scan" class="tab" data-tab="scan" role="tab" aria-selected="false" aria-controls="tab-scan">位置探索</button>
       <button id="tab-btn-lab" class="tab" data-tab="lab" role="tab" aria-selected="false" aria-controls="tab-lab">Unicode比較ラボ</button>
     </div>
 
@@ -120,6 +121,63 @@
             </table>
           </div>
         </details>
+      </section>
+    </div>
+
+    <div id="tab-scan" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-scan">
+      <section class="panel">
+        <h2>行頭・行末の位置を一括探索</h2>
+        <p class="help-text">指定した範囲をまとめて抽出し、候補文字列と対象行に対するカバー率を比較します。</p>
+        <div class="sample-actions" aria-label="位置探索サンプル">
+          <button class="btn-action scan-sample" type="button" data-scan-sample="head">行頭にCODE</button>
+          <button class="btn-action scan-sample" type="button" data-scan-sample="tail">行末にSAFE</button>
+          <button class="btn-action scan-sample" type="button" data-scan-sample="uneven">不ぞろいな行</button>
+          <button class="btn-action scan-sample" type="button" data-scan-sample="emoji">絵文字</button>
+        </div>
+        <label class="field-label" for="input-scan">探索するテキスト</label>
+        <textarea id="input-scan" maxlength="100000" aria-label="探索するテキスト" placeholder="サンプルを選ぶか、複数行のテキストを入力してください"></textarea>
+        <div class="options scan-options">
+          <div class="option-group">
+            <label for="scan-max">探索する最大位置</label>
+            <input type="number" id="scan-max" min="1" max="100" value="6">
+          </div>
+          <div class="option-group">
+            <label for="scan-coverage">最低カバー率（%）</label>
+            <input type="number" id="scan-coverage" min="0" max="100" step="10" value="100">
+          </div>
+          <div class="option-group">
+            <label for="normalization-scan">Unicode正規化</label>
+            <select id="normalization-scan">
+              <option value="none">正規化しない</option>
+              <option value="NFC">NFC</option>
+              <option value="NFKC">NFKC</option>
+            </select>
+          </div>
+          <label class="check-option" for="trim-scan">
+            <input id="trim-scan" type="checkbox" checked>
+            行頭の空白を無視する
+          </label>
+        </div>
+        <fieldset class="direction-fieldset">
+          <legend>探索方向</legend>
+          <div class="direction-options">
+            <label class="check-option" for="scan-head"><input id="scan-head" type="checkbox" checked>行頭から</label>
+            <label class="check-option" for="scan-tail"><input id="scan-tail" type="checkbox" checked>行末から</label>
+          </div>
+        </fieldset>
+        <div class="primary-actions">
+          <button id="run-scan" class="btn-primary" type="button">探索する</button>
+          <button id="clear-scan" class="btn-action" type="button">クリア</button>
+        </div>
+        <div id="summary-scan" class="result-summary" aria-live="polite"></div>
+        <p id="scan-empty" class="empty-message" hidden>条件に合う候補がありません。</p>
+        <div class="table-scroll" tabindex="0" aria-label="位置探索の候補一覧">
+          <table class="scan-table">
+            <thead><tr><th>方向</th><th>位置</th><th>候補文字列</th><th>カバー率</th><th>採用／対象</th><th>追跡</th></tr></thead>
+            <tbody id="scan-results"></tbody>
+          </table>
+        </div>
+        <p class="notice">候補文字列とカバー率は、指定した位置規則の結果です。意味のある文字列に見えても、隠しメッセージの存在や作成者の意図を証明しません。</p>
       </section>
     </div>
 

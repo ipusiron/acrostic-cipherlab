@@ -8,7 +8,7 @@
   const segmenter = typeof Intl !== "undefined" && Intl.Segmenter
     ? new Intl.Segmenter(undefined, { granularity: "grapheme" })
     : null;
-  const limits = Object.freeze({ maxTextLength: 100000, maxLines: 2000, maxPosition: 10000 });
+  const limits = Object.freeze({ maxTextLength: 100000, maxLines: 2000, maxPosition: 10000, maxScanPosition: 100 });
 
   function rangeError(code, message) {
     const error = new RangeError(message);
@@ -127,6 +127,61 @@
     }));
   }
 
+  function scanPositions(text, options = {}) {
+    const validated = validateText(text);
+    const maxPosition = Number(options.maxPosition ?? 10);
+    if (!Number.isInteger(maxPosition) || maxPosition < 1 || maxPosition > limits.maxScanPosition) {
+      throw rangeError("invalid-scan-position", `scan position must be an integer from 1 to ${limits.maxScanPosition}`);
+    }
+    const minCoverage = Number(options.minCoverage ?? 0);
+    if (!Number.isFinite(minCoverage) || minCoverage < 0 || minCoverage > 100) {
+      throw rangeError("invalid-coverage", "minimum coverage must be from 0 to 100");
+    }
+    const directions = Array.from(new Set(options.directions || ["head", "tail"]));
+    if (!directions.length || directions.some(direction => direction !== "head" && direction !== "tail")) {
+      throw rangeError("invalid-directions", "select at least one valid direction");
+    }
+
+    const prepared = validated.lines.map(source => {
+      const normalized = normalizeLine(source, options.normalization || "none", Boolean(options.ignoreLeadingWhitespace));
+      return { source, normalized, graphemes: splitGraphemes(normalized) };
+    });
+    const eligible = prepared.filter(line => line.graphemes.length > 0);
+    const candidates = [];
+
+    directions.forEach(direction => {
+      for (let position = 1; position <= maxPosition; position += 1) {
+        const selected = [];
+        eligible.forEach(line => {
+          const index = direction === "head" ? position - 1 : line.graphemes.length - position;
+          if (index >= 0 && index < line.graphemes.length) selected.push(line.graphemes[index]);
+        });
+        if (!selected.length) continue;
+        const coverage = eligible.length ? (selected.length / eligible.length) * 100 : 0;
+        if (coverage < minCoverage) continue;
+        candidates.push({
+          direction,
+          position,
+          result: selected.join(""),
+          selectedCount: selected.length,
+          eligibleCount: eligible.length,
+          missingCount: eligible.length - selected.length,
+          coverage: Number(coverage.toFixed(1))
+        });
+      }
+    });
+
+    return {
+      candidates,
+      totalLines: validated.lines.length,
+      eligibleCount: eligible.length,
+      ignoredCount: prepared.length - eligible.length,
+      maxPosition,
+      minCoverage,
+      directions
+    };
+  }
+
   return {
     limits,
     segmentationMode: segmenter ? "grapheme" : "code-point-fallback",
@@ -136,6 +191,7 @@
     analyzeLine,
     analyzeText,
     extract,
-    compareVariants
+    compareVariants,
+    scanPositions
   };
 });

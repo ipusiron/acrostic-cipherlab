@@ -24,7 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
     whitespace: "  SPACE\n\tTAB\nNO SPACE",
     compatibility: "Ａ fullwidth\nA ASCII\n① circled"
   };
+  const scanSamples = {
+    head: "CATXYZ\nOPQRST\nDEABCD\nEFGHIJ",
+    tail: "clueS\nalphA\nbrieF\ncodE",
+    uneven: "ABC\nDE\nF",
+    emoji: "😀Alpha\n🧪Bravo\n🔐Charlie"
+  };
   let labHasRun = false;
+  let scanHasRun = false;
 
   function tr(value) {
     return window.I18n ? window.I18n.t(value) : value;
@@ -34,6 +41,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (error && error.code === "text-too-long") return tr("エラー: 入力は100,000 UTF-16コード単位以内にしてください");
     if (error && error.code === "too-many-lines") return tr("エラー: 入力は2,000行以内にしてください");
     return tr("エラー: 位置は1から10,000までの整数を入力してください");
+  }
+
+  function scanErrorMessage(error) {
+    if (error && error.code === "invalid-scan-position") return tr("エラー: 最大位置は1から100までの整数を入力してください");
+    if (error && error.code === "invalid-coverage") return tr("エラー: 最低カバー率は0から100までで指定してください");
+    if (error && error.code === "invalid-directions") return tr("エラー: 探索方向を1つ以上選んでください");
+    return errorMessage(error);
   }
 
   function appendCell(row, value) {
@@ -174,6 +188,71 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function openCandidate(direction, position) {
+    document.getElementById("input-adv").value = document.getElementById("input-scan").value;
+    modeSelect.value = direction;
+    document.getElementById("n").value = String(position);
+    document.getElementById("normalization-adv").value = document.getElementById("normalization-scan").value;
+    document.getElementById("trim-adv").checked = document.getElementById("trim-scan").checked;
+    updateModeOptions();
+    runAdvanced();
+    activateTab(document.getElementById("tab-btn-advanced"), true);
+    document.getElementById("summary-adv").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function clearScanOutput() {
+    document.getElementById("scan-results").replaceChildren();
+    document.getElementById("summary-scan").textContent = "";
+    document.getElementById("scan-empty").hidden = true;
+  }
+
+  function runScan() {
+    const directions = [];
+    if (document.getElementById("scan-head").checked) directions.push("head");
+    if (document.getElementById("scan-tail").checked) directions.push("tail");
+    const summary = document.getElementById("summary-scan");
+    try {
+      const scan = AcrosticCore.scanPositions(document.getElementById("input-scan").value, {
+        maxPosition: Number(document.getElementById("scan-max").value),
+        minCoverage: Number(document.getElementById("scan-coverage").value),
+        normalization: document.getElementById("normalization-scan").value,
+        ignoreLeadingWhitespace: document.getElementById("trim-scan").checked,
+        directions
+      });
+      const body = document.getElementById("scan-results");
+      body.replaceChildren();
+      scan.candidates.forEach(candidate => {
+        const row = document.createElement("tr");
+        [
+          tr(candidate.direction === "head" ? "行頭" : "行末"),
+          String(candidate.position),
+          visibleString(candidate.result),
+          `${candidate.coverage}%`,
+          `${candidate.selectedCount} / ${candidate.eligibleCount}`
+        ].forEach(value => appendCell(row, value));
+        const actionCell = document.createElement("td");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "btn-action candidate-action";
+        button.textContent = tr("追跡表で確認");
+        button.addEventListener("click", () => openCandidate(candidate.direction, candidate.position));
+        actionCell.appendChild(button);
+        row.appendChild(actionCell);
+        body.appendChild(row);
+      });
+      summary.textContent = tr("候補 {count}件・対象 {eligible}行・対象外 {ignored}行")
+        .replace("{count}", scan.candidates.length)
+        .replace("{eligible}", scan.eligibleCount)
+        .replace("{ignored}", scan.ignoredCount);
+      document.getElementById("scan-empty").hidden = scan.candidates.length > 0;
+      scanHasRun = true;
+    } catch (error) {
+      clearScanOutput();
+      summary.textContent = scanErrorMessage(error);
+      scanHasRun = true;
+    }
+  }
+
   function visibleToken(value) {
     if (value === " ") return "␠";
     if (value === "\t") return "⇥";
@@ -267,6 +346,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("run-basic").addEventListener("click", runBasic);
   document.getElementById("run-adv").addEventListener("click", runAdvanced);
+  document.getElementById("run-scan").addEventListener("click", runScan);
+  document.getElementById("clear-scan").addEventListener("click", () => {
+    document.getElementById("input-scan").value = "";
+    document.getElementById("scan-max").value = "6";
+    document.getElementById("scan-coverage").value = "100";
+    clearScanOutput();
+    scanHasRun = false;
+    document.getElementById("input-scan").focus();
+  });
+  document.querySelectorAll(".scan-sample").forEach(button => {
+    button.addEventListener("click", () => {
+      document.getElementById("input-scan").value = scanSamples[button.dataset.scanSample];
+      if (button.dataset.scanSample === "uneven") document.getElementById("scan-coverage").value = "50";
+      else document.getElementById("scan-coverage").value = "100";
+      runScan();
+    });
+  });
+  ["input-scan", "scan-max", "scan-coverage", "normalization-scan", "trim-scan", "scan-head", "scan-tail"]
+    .forEach(id => {
+      const element = document.getElementById(id);
+      element.addEventListener(element.type === "checkbox" || element.tagName === "SELECT" ? "change" : "input", () => {
+        if (scanHasRun) runScan();
+      });
+    });
   document.getElementById("run-lab").addEventListener("click", runLab);
   document.getElementById("clear-lab").addEventListener("click", () => {
     document.getElementById("input-lab").value = "";
@@ -296,6 +399,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     if (document.getElementById("trace-basic").children.length) runBasic();
     if (document.getElementById("trace-adv").children.length) runAdvanced();
+    if (scanHasRun) runScan();
     if (labHasRun) runLab();
     renderSegmentationMode();
   });
