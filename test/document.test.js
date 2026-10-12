@@ -20,8 +20,8 @@ test("利用者入力をHTMLとして挿入しない", () => {
 });
 
 test("タブのARIA関連付けと言語切り替えを持つ", () => {
-  assert.equal((html.match(/role="tab"/g) || []).length, 3);
-  assert.equal((html.match(/role="tabpanel"/g) || []).length, 3);
+  assert.equal((html.match(/role="tab"/g) || []).length, 4);
+  assert.equal((html.match(/role="tabpanel"/g) || []).length, 4);
   assert.match(html, /id="language-toggle"/);
   assert.ok(html.indexOf('src="i18n.js"') < html.indexOf('src="script.js"'));
 });
@@ -30,9 +30,18 @@ test("Unicode比較ラボと入力上限を持つ", () => {
   for (const id of ["tab-lab", "input-lab", "lab-line", "lab-n", "segmentation-mode", "unicode-counts", "codepoint-tokens", "grapheme-tokens", "variant-results"]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
-  assert.equal((html.match(/maxlength="100000"/g) || []).length, 3);
+  assert.equal((html.match(/maxlength="100000"/g) || []).length, 4);
   assert.match(script, /AcrosticCore\.analyzeText/);
   assert.match(script, /AcrosticCore\.compareVariants/);
+});
+
+test("位置探索タブと安全な候補描画を備える", () => {
+  for (const id of ["tab-scan", "input-scan", "scan-max", "scan-coverage", "normalization-scan", "trim-scan", "scan-head", "scan-tail", "run-scan", "scan-results"]) {
+    assert.match(html, new RegExp(`id="${id}"`));
+  }
+  assert.match(script, /AcrosticCore\.scanPositions/);
+  assert.match(script, /openCandidate/);
+  assert.match(script, /visibleString\(candidate\.result\)/);
 });
 
 test("追跡表とUnicode処理のコントロールを持つ", () => {

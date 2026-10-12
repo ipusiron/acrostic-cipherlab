@@ -230,6 +230,25 @@ input[type="number"] {
 
 .check-option input { width: 1.2rem; height: 1.2rem; }
 
+.direction-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.direction-fieldset legend {
+  margin-bottom: 0.25rem;
+  color: #555;
+  font-size: 0.875rem;
+}
+
+.direction-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
 .help-text,
 .notice {
   margin: 0.25rem 0 1rem;
@@ -283,6 +302,10 @@ input[type="number"] {
 .table-scroll:focus-visible { outline: 2px solid #2d6bb3; outline-offset: 2px; }
 table { width: 100%; min-width: 34rem; border-collapse: collapse; font-size: 0.9rem; }
 .unicode-table { min-width: 48rem; }
+.scan-table { min-width: 43rem; }
+.scan-table td:nth-child(3) { max-width: 16rem; overflow-wrap: anywhere; }
+.candidate-action { white-space: nowrap; }
+.empty-message { margin: 0.75rem 0 0; color: #555; }
 th, td { padding: 0.55rem; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
 th { background: #eef4fb; white-space: nowrap; }
 tbody tr:last-child td { border-bottom: 0; }
@@ -368,6 +391,15 @@ footer {
 
   .option-group {
     flex: 1;
+  }
+
+  .scan-options {
+    flex-wrap: wrap;
+  }
+
+  .scan-options .option-group,
+  .scan-options .direction-fieldset {
+    flex: 1 1 10rem;
   }
 
   .btn-primary {

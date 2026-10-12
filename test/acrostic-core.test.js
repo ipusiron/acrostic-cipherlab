@@ -82,3 +82,48 @@ test("入力サイズと行数に上限を設ける", () => {
   assert.throws(() => core.extract("x".repeat(core.limits.maxTextLength + 1)), error => error.code === "text-too-long");
   assert.throws(() => core.analyzeText("x\n".repeat(core.limits.maxLines)), error => error.code === "too-many-lines");
 });
+
+test("行頭と行末の複数位置を一括探索する", () => {
+  const scan = core.scanPositions("CATXYZ\nOPQRST\nDEABCD\nEFGHIJ", {
+    maxPosition: 2,
+    minCoverage: 100,
+    directions: ["head", "tail"]
+  });
+  assert.deepEqual(scan.candidates.map(item => [item.direction, item.position, item.result]), [
+    ["head", 1, "CODE"],
+    ["head", 2, "APEF"],
+    ["tail", 1, "ZTDJ"],
+    ["tail", 2, "YSCI"]
+  ]);
+  assert.equal(scan.eligibleCount, 4);
+  assert.equal(scan.ignoredCount, 0);
+});
+
+test("カバー率で短い行を含む候補を絞り込む", () => {
+  const scan = core.scanPositions("ABC\nDE\nF", { maxPosition: 3, minCoverage: 50 });
+  assert.deepEqual(scan.candidates.map(item => [item.direction, item.position, item.result, item.coverage]), [
+    ["head", 1, "ADF", 100],
+    ["head", 2, "BE", 66.7],
+    ["tail", 1, "CEF", 100],
+    ["tail", 2, "BD", 66.7]
+  ]);
+});
+
+test("探索でも書記素・正規化・空白設定を維持する", () => {
+  const scan = core.scanPositions("  😀A\n\n ＡB", {
+    maxPosition: 1,
+    minCoverage: 100,
+    directions: ["head"],
+    normalization: "NFKC",
+    ignoreLeadingWhitespace: true
+  });
+  assert.equal(scan.candidates[0].result, "😀A");
+  assert.equal(scan.eligibleCount, 2);
+  assert.equal(scan.ignoredCount, 1);
+});
+
+test("探索上限・カバー率・方向を検証する", () => {
+  assert.throws(() => core.scanPositions("ABC", { maxPosition: 101 }), error => error.code === "invalid-scan-position");
+  assert.throws(() => core.scanPositions("ABC", { minCoverage: 101 }), error => error.code === "invalid-coverage");
+  assert.throws(() => core.scanPositions("ABC", { directions: [] }), error => error.code === "invalid-directions");
+});
