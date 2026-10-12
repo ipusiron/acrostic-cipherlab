@@ -51,5 +51,34 @@ test("CRLFを余分な文字として扱わない", () => {
 });
 
 test("nが正の整数でなければ拒否する", () => {
-  for (const n of [0, -1, 1.5, NaN]) assert.throws(() => core.extract("ABC", { n }), RangeError);
+  for (const n of [0, -1, 1.5, 10001, NaN]) assert.throws(() => core.extract("ABC", { n }), RangeError);
+});
+
+test("UTF-16・コードポイント・書記素の文字数を区別する", () => {
+  assert.ok(["grapheme", "code-point-fallback"].includes(core.segmentationMode));
+  const emoji = core.analyzeLine("😀");
+  assert.deepEqual([emoji.utf16Count, emoji.codePointCount, emoji.graphemeCount], [2, 1, 1]);
+  const combining = core.analyzeLine("e\u0301");
+  assert.deepEqual([combining.utf16Count, combining.codePointCount, combining.graphemeCount], [2, 2, 1]);
+  assert.deepEqual(combining.codePoints.map(item => item.code), ["U+0065", "U+0301"]);
+});
+
+test("NFCとNFKCによる変化を行ごとに示す", () => {
+  const [combining, fullwidth] = core.analyzeText("e\u0301\nＡ");
+  assert.equal(combining.nfc, "é");
+  assert.equal(combining.nfcChanged, true);
+  assert.equal(fullwidth.nfcChanged, false);
+  assert.equal(fullwidth.nfkc, "A");
+  assert.equal(fullwidth.nfkcChanged, true);
+});
+
+test("正規化と行頭空白の4条件を同じ入力で比較する", () => {
+  const variants = core.compareVariants("  Ａlpha\n e\u0301clair", 1);
+  assert.deepEqual(variants.map(item => item.id), ["raw-keep", "raw-trim", "nfc-trim", "nfkc-trim"]);
+  assert.deepEqual(variants.map(item => item.result), ["  ", "Ａe\u0301", "Ａé", "Aé"]);
+});
+
+test("入力サイズと行数に上限を設ける", () => {
+  assert.throws(() => core.extract("x".repeat(core.limits.maxTextLength + 1)), error => error.code === "text-too-long");
+  assert.throws(() => core.analyzeText("x\n".repeat(core.limits.maxLines)), error => error.code === "too-many-lines");
 });

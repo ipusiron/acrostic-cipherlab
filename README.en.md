@@ -6,7 +6,7 @@
 
 **Day103 - Security Tools Built with Generative AI 200**
 
-Acrostic CipherLab extracts characters at specified positions across multiple lines. It shows not only the resulting message but also the source line, selected position, character, and reason for every excluded line.
+Acrostic CipherLab extracts characters at specified positions across multiple lines. It shows the source of every selected or excluded character and compares how Unicode counting and normalization affect the same input.
 
 ## 🌐 Demo
 
@@ -14,7 +14,7 @@ Try it at [https://ipusiron.github.io/acrostic-cipherlab/](https://ipusiron.gith
 
 ## 📸 Screenshot
 
-![Acrostic extraction and trace](assets/en/screenshot.png)
+![Combining-character analysis in the Unicode Comparison Lab](assets/en/screenshot.png)
 
 ## 🔬 What is an acrostic?
 
@@ -33,16 +33,23 @@ For example, selecting the first character from four lines beginning with `C`, `
 - Inspect a trace table containing line number, action, position, selected character, and exclusion reason.
 - Distinguish empty lines, whitespace-only lines, short lines, and lines without target punctuation.
 - Switch the complete interface between Japanese and English while preserving inputs and results.
-- Use the two tabs with pointer, keyboard arrows, Home, and End.
+- Use the three tabs with pointer, keyboard arrows, Home, and End.
+- Compare UTF-16 code units, Unicode code points, and grapheme clusters by line.
+- Inspect code-point and grapheme segmentation with `U+XXXX` labels.
+- Compare four extraction conditions: raw text with whitespace, raw text without leading whitespace, NFC, and NFKC.
+- Load emoji, combining-mark, leading-whitespace, and compatibility-character samples.
+- Limit processing to 100,000 UTF-16 code units, 2,000 lines, and position 10,000 to reduce accidental browser stalls.
 
 ## 📖 How to use
 
-1. Select **Acrostic** or **Extended Acrostic**.
+1. Select **Acrostic**, **Extended Acrostic**, or **Unicode Comparison Lab**.
 2. Paste or enter multiple lines.
 3. Choose whitespace and normalization behavior.
 4. In the extended tab, select a mode, value of n, and punctuation set when applicable.
 5. Press **Extract**.
 6. Compare the result with the extraction trace.
+
+In the Unicode Comparison Lab, choose a learning sample or enter text and press **Compare**. Once comparison has started, editing the input, selected line, or extraction position updates the results immediately.
 
 ## 🎯 Practical experiments
 
@@ -50,6 +57,7 @@ For example, selecting the first character from four lines beginning with `C`, `
 - Enter `AB,tail` and `CD。末尾`, choose both punctuation sets and n=1; the result is `BD`.
 - Mix an empty line, a whitespace-only line, and a one-character line with n=2; the trace reports each distinct exclusion reason.
 - Compare NFC and no normalization with a decomposed sequence such as `e` plus a combining acute accent.
+- In the comparison lab, verify that `😀` is two UTF-16 code units but one code point and one grapheme, while `e` plus a combining acute is two code points but one grapheme.
 - Read a rectangular word-search column by selecting the same nth position from every row.
 - Audit CTF or puzzle text while retaining the original line numbers used to form a candidate message.
 
@@ -58,6 +66,8 @@ For example, selecting the first character from four lines beginning with `C`, `
 - The tool applies a user-selected positional rule. It does not prove that a hidden message was intentional.
 - With `Intl.Segmenter`, positions are counted as grapheme clusters. The fallback counts Unicode code points, which can differ for complex sequences.
 - NFKC can change source text, including full-width characters. For evidence preservation or exact source comparison, select no normalization and retain the original separately.
+- Comparison results show representation and preprocessing differences; they do not prove a hidden message or authorial intent.
+- Processing is limited to 100,000 UTF-16 code units, 2,000 lines, and position 10,000 to reduce accidental browser stalls.
 - Extracted text is not proof of successful cryptanalysis and does not provide confidentiality.
 
 ## 🔒 Privacy and security
@@ -72,7 +82,7 @@ No package installation is required.
 npm test
 ```
 
-The suite covers emoji, combining characters, NFC/NFKC, CRLF, leading whitespace, Japanese and Western punctuation, excluded-line reasons, document security, ARIA, and primary translations.
+The 21-test suite covers emoji, combining characters, Unicode unit counts, NFC/NFKC comparisons, input limits, CRLF, leading whitespace, Japanese and Western punctuation, excluded-line reasons, document security, ARIA, and primary translations.
 
 ## 📁 Project structure
 
