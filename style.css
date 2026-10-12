@@ -14,6 +14,30 @@ body {
   color: #222;
 }
 
+.site-header {
+  position: relative;
+  padding: 1rem 4.75rem 0.5rem 1rem;
+  text-align: center;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+.site-header h1 { margin: 0; color: #333; font-size: clamp(1.55rem, 7vw, 2rem); }
+.site-header p { margin: 0.35rem auto 0; max-width: 48rem; color: #555; }
+
+.language-toggle {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  min-height: 44px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #777;
+  border-radius: 6px;
+  background: #fff;
+  color: #222;
+  cursor: pointer;
+}
+
 .container {
   max-width: 800px;
   margin: 0 auto;
@@ -36,10 +60,15 @@ h2 {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
+  overflow-x: auto;
+  padding: 0.1rem 0.1rem 0.4rem;
+  scroll-padding-inline: 0.1rem;
+  scrollbar-width: thin;
 }
 
 .tab {
-  flex: 1;
+  flex: 0 0 auto;
+  min-height: 44px;
   padding: 0.75rem 1rem;
   border: 1px solid #ccc;
   background: #fff;
@@ -70,7 +99,7 @@ h2 {
 .panel {
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 0 0 4px 4px;
+  border-radius: 4px;
   padding: 1rem;
 }
 
@@ -114,6 +143,7 @@ textarea[readonly] {
 
 select,
 input[type="number"] {
+  min-height: 44px;
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -134,6 +164,7 @@ input[type="number"] {
   display: block;
   width: 100%;
   padding: 0.75rem 1.5rem;
+  min-height: 44px;
   margin: 1rem 0;
   background-color: #4a90d9;
   color: #fff;
@@ -173,6 +204,7 @@ input[type="number"] {
 .btn-action {
   padding: 0.5rem 1rem;
   min-width: 80px;
+  min-height: 44px;
   background-color: #fff;
   color: #666;
   border: 1px solid #ccc;
@@ -181,6 +213,33 @@ input[type="number"] {
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
 }
+
+.check-option {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  font-size: 0.9rem;
+}
+
+.check-option input { width: 1.2rem; height: 1.2rem; }
+
+.result-summary {
+  min-height: 1.5rem;
+  margin-top: 0.75rem;
+  color: #444;
+  font-weight: 600;
+}
+
+.trace-details { margin-top: 0.75rem; }
+.trace-details summary { min-height: 44px; padding: 0.6rem 0; cursor: pointer; font-weight: 700; }
+.table-scroll { max-width: 100%; overflow-x: auto; border: 1px solid #ddd; border-radius: 4px; }
+.table-scroll:focus-visible { outline: 2px solid #2d6bb3; outline-offset: 2px; }
+table { width: 100%; min-width: 34rem; border-collapse: collapse; font-size: 0.9rem; }
+th, td { padding: 0.55rem; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
+th { background: #eef4fb; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+tr.excluded td { color: #666; background: #fafafa; }
 
 .btn-action:hover {
   background-color: #f5f5f5;
@@ -218,6 +277,8 @@ footer {
 }
 
 @media (min-width: 600px) {
+  .tabs { justify-content: center; }
+
   .options {
     flex-direction: row;
     align-items: flex-end;

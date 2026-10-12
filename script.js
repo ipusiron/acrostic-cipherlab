@@ -1,129 +1,159 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // タブ切り替え処理
-  const tabs = document.querySelectorAll('.tab');
-  const tabContents = document.querySelectorAll('.tab-content');
+document.addEventListener("DOMContentLoaded", () => {
+  "use strict";
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const targetTab = tab.dataset.tab;
+  const tabs = Array.from(document.querySelectorAll(".tab"));
+  const tabContents = Array.from(document.querySelectorAll(".tab-content"));
+  const modeSelect = document.getElementById("mode");
+  const punctuationGroup = document.getElementById("punctuation-group");
+  const reasonLabels = {
+    selected: "採用",
+    "empty-line": "空行",
+    "whitespace-only": "空白だけの行",
+    "symbol-not-found": "対象の句読点なし",
+    "too-short": "指定位置まで文字がない"
+  };
 
-      tabs.forEach(t => {
-        t.classList.remove('active');
-        t.setAttribute('aria-selected', 'false');
-      });
-      tabContents.forEach(c => c.classList.remove('active'));
+  function tr(value) {
+    return window.I18n ? window.I18n.t(value) : value;
+  }
 
-      tab.classList.add('active');
-      tab.setAttribute('aria-selected', 'true');
-      document.getElementById(`tab-${targetTab}`).classList.add('active');
+  function activateTab(tab, focus) {
+    const targetId = `tab-${tab.dataset.tab}`;
+    tabs.forEach(item => {
+      const selected = item === tab;
+      item.classList.toggle("active", selected);
+      item.setAttribute("aria-selected", String(selected));
+      item.tabIndex = selected ? 0 : -1;
+    });
+    tabContents.forEach(content => {
+      const selected = content.id === targetId;
+      content.classList.toggle("active", selected);
+      content.hidden = !selected;
+    });
+    if (focus) tab.focus();
+    tab.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+  }
+
+  tabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => activateTab(tab, false));
+    tab.addEventListener("keydown", event => {
+      let nextIndex = null;
+      if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+      if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+      if (event.key === "Home") nextIndex = 0;
+      if (event.key === "End") nextIndex = tabs.length - 1;
+      if (nextIndex !== null) {
+        event.preventDefault();
+        activateTab(tabs[nextIndex], true);
+      }
     });
   });
+  activateTab(tabs.find(tab => tab.classList.contains("active")) || tabs[0], false);
 
-  // コピー機能
   function copyToClipboard(textareaId, buttonId) {
     const textarea = document.getElementById(textareaId);
     const button = document.getElementById(buttonId);
-
-    button.addEventListener('click', async () => {
-      const text = textarea.value;
-      if (!text) return;
-
+    button.addEventListener("click", async () => {
+      if (!textarea.value) return;
       try {
-        await navigator.clipboard.writeText(text);
-        button.textContent = 'コピー完了';
-        button.classList.add('copied');
-
-        setTimeout(() => {
-          button.textContent = 'コピー';
-          button.classList.remove('copied');
-        }, 1500);
+        await navigator.clipboard.writeText(textarea.value);
+        button.dataset.state = "copied";
+        button.classList.add("copied");
+        button.textContent = tr("コピー完了");
       } catch {
-        button.textContent = '失敗';
-        setTimeout(() => {
-          button.textContent = 'コピー';
-        }, 1500);
+        button.dataset.state = "failed";
+        button.textContent = tr("失敗");
       }
+      setTimeout(() => {
+        button.dataset.state = "idle";
+        button.textContent = tr("コピー");
+        button.classList.remove("copied");
+      }, 1500);
     });
   }
 
-  copyToClipboard('output-basic', 'copy-basic');
-  copyToClipboard('output-adv', 'copy-adv');
-
-  // クリア機能
-  function setupClear(inputId, outputId, buttonId) {
-    const input = document.getElementById(inputId);
-    const output = document.getElementById(outputId);
-    const button = document.getElementById(buttonId);
-
-    button.addEventListener('click', () => {
-      input.value = '';
-      output.value = '';
-      input.focus();
-    });
+  function clearResult(prefix) {
+    document.getElementById(`input-${prefix}`).value = "";
+    document.getElementById(`output-${prefix === "adv" ? "adv" : "basic"}`).value = "";
+    document.getElementById(`trace-${prefix}`).replaceChildren();
+    document.getElementById(`summary-${prefix}`).textContent = "";
+    document.getElementById(`input-${prefix}`).focus();
   }
 
-  setupClear('input-basic', 'output-basic', 'clear-basic');
-  setupClear('input-adv', 'output-adv', 'clear-adv');
+  document.getElementById("clear-basic").addEventListener("click", () => clearResult("basic"));
+  document.getElementById("clear-adv").addEventListener("click", () => clearResult("adv"));
+  copyToClipboard("output-basic", "copy-basic");
+  copyToClipboard("output-adv", "copy-adv");
 
-  // 基本タブ：行頭文字抽出
-  const runBasic = document.getElementById('run-basic');
-  const inputBasic = document.getElementById('input-basic');
-  const outputBasic = document.getElementById('output-basic');
+  function renderTrace(targetId, summaryId, extraction) {
+    const body = document.getElementById(targetId);
+    body.replaceChildren();
+    extraction.trace.forEach(row => {
+      const trElement = document.createElement("tr");
+      trElement.className = row.status;
+      const values = [
+        String(row.lineNumber),
+        row.status === "selected" ? tr("採用") : tr("除外"),
+        row.position === null ? "—" : String(row.position),
+        row.selected || "—",
+        tr(reasonLabels[row.reason] || row.reason)
+      ];
+      values.forEach(value => {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        trElement.appendChild(cell);
+      });
+      body.appendChild(trElement);
+    });
+    document.getElementById(summaryId).textContent = tr("採用 {selected} 行・除外 {excluded} 行")
+      .replace("{selected}", extraction.selectedCount)
+      .replace("{excluded}", extraction.excludedCount);
+  }
 
-  runBasic.addEventListener('click', () => {
-    const lines = inputBasic.value.split(/\r?\n/);
-    let result = '';
+  function runBasic() {
+    const extraction = AcrosticCore.extract(document.getElementById("input-basic").value, {
+      mode: "head",
+      n: 1,
+      normalization: document.getElementById("normalization-basic").value,
+      ignoreLeadingWhitespace: document.getElementById("trim-basic").checked
+    });
+    document.getElementById("output-basic").value = extraction.result;
+    renderTrace("trace-basic", "summary-basic", extraction);
+  }
 
-    for (const line of lines) {
-      if (line.length > 0) {
-        result += line[0];
-      }
+  function runAdvanced() {
+    const output = document.getElementById("output-adv");
+    try {
+      const extraction = AcrosticCore.extract(document.getElementById("input-adv").value, {
+        mode: modeSelect.value,
+        n: Number(document.getElementById("n").value),
+        normalization: document.getElementById("normalization-adv").value,
+        ignoreLeadingWhitespace: document.getElementById("trim-adv").checked,
+        punctuation: document.getElementById("punctuation").value
+      });
+      output.value = extraction.result;
+      renderTrace("trace-adv", "summary-adv", extraction);
+    } catch {
+      output.value = tr("エラー: n は1以上の整数を入力してください");
+      document.getElementById("trace-adv").replaceChildren();
+      document.getElementById("summary-adv").textContent = "";
     }
+  }
 
-    outputBasic.value = result;
-  });
+  function updateModeOptions() {
+    punctuationGroup.hidden = modeSelect.value !== "symbol";
+  }
 
-  // 拡張タブ：モード別文字抽出
-  const runAdv = document.getElementById('run-adv');
-  const inputAdv = document.getElementById('input-adv');
-  const outputAdv = document.getElementById('output-adv');
-  const modeSelect = document.getElementById('mode');
-  const nInput = document.getElementById('n');
+  document.getElementById("run-basic").addEventListener("click", runBasic);
+  document.getElementById("run-adv").addEventListener("click", runAdvanced);
+  modeSelect.addEventListener("change", updateModeOptions);
+  updateModeOptions();
 
-  runAdv.addEventListener('click', () => {
-    const lines = inputAdv.value.split(/\r?\n/);
-    const mode = modeSelect.value;
-    const n = parseInt(nInput.value, 10);
-
-    if (isNaN(n) || n < 1) {
-      outputAdv.value = 'エラー: n は1以上の整数を入力してください';
-      return;
-    }
-
-    let result = '';
-
-    for (const line of lines) {
-      if (line.length === 0) continue;
-
-      if (mode === 'head') {
-        // 行頭から n 文字目
-        if (line.length >= n) {
-          result += line[n - 1];
-        }
-      } else if (mode === 'tail') {
-        // 行末から前に n 文字目
-        if (line.length >= n) {
-          result += line[line.length - n];
-        }
-      } else if (mode === 'symbol') {
-        // カンマ・ピリオド前の n 文字目
-        const pos = line.search(/[,.]/);
-        if (pos >= 0 && pos - n >= 0) {
-          result += line[pos - n];
-        }
-      }
-    }
-
-    outputAdv.value = result;
+  window.addEventListener("languagechange", () => {
+    document.querySelectorAll(".btn-action[data-state]").forEach(button => {
+      if (button.dataset.state === "idle") button.textContent = tr("コピー");
+    });
+    if (document.getElementById("trace-basic").children.length) runBasic();
+    if (document.getElementById("trace-adv").children.length) runAdvanced();
   });
 });
